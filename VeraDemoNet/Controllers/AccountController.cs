@@ -25,6 +25,12 @@ namespace VeraDemoNet.Controllers
 
         private const string COOKIE_NAME = "UserDetails";
 
+        private readonly List<string> whitelistedUrls =
+            new List<string> 
+            {
+                "https://www.google.com"
+            };
+
         public AccountController()
         {
             logger = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);    
@@ -132,9 +138,13 @@ namespace VeraDemoNet.Controllers
                         return RedirectToAction("Feed", "Blab");
                     }
 
-                    /* START BAD CODE */
-                    return Redirect(ReturnUrl);
-                    /* END BAD CODE */
+                    if (Url.IsLocalUrl(ReturnUrl) || whitelistedUrls.Contains(ReturnUrl, StringComparer.OrdinalIgnoreCase))
+                    {
+                        /* START BAD CODE */
+                        return Redirect(ReturnUrl);
+                        /* END BAD CODE */
+                    }
+                    return RedirectToAction("Login", "Account");
                 }
             }
             catch (Exception ex)
