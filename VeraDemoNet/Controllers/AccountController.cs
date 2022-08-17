@@ -9,6 +9,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Mvc;
@@ -22,6 +23,7 @@ namespace VeraDemoNet.Controllers
     public class AccountController : AuthControllerBase
     {
         protected readonly log4net.ILog logger;
+        private static readonly Regex usernameRegex = new Regex("^[a-zA-Z0-9]*$");
 
         private const string COOKIE_NAME = "UserDetails";
 
@@ -448,6 +450,12 @@ namespace VeraDemoNet.Controllers
 
             Session["username"] = username;
 
+            if (!usernameRegex.IsMatch(username))
+            {
+                registerViewModel.Error = "Username '" + username + "' not valid!";
+                return View(registerViewModel);
+            }
+
             var sql = "SELECT count(*) FROM users WHERE username = @username";
             using (var dbContext = new BlabberDB())
             {
@@ -484,14 +492,15 @@ namespace VeraDemoNet.Controllers
         private List<string> RetrieveMyEvents(DbConnection connect, string username)
         {
             // START BAD CODE
-            var sqlMyEvents = "select event from users_history where blabber='" + 
-                              username + "' ORDER BY eventid DESC; ";
+            var sqlMyEvents = "select event from users_history where blabber=@username" + 
+                              " ORDER BY eventid DESC; ";
             logger.Info(sqlMyEvents);
             
             var myEvents = new List<string>();
             using (var eventsCommand = connect.CreateCommand())
             {
                 eventsCommand.CommandText = sqlMyEvents;
+                eventsCommand.Parameters.Add(new SqlParameter("username", username));
                 using (var userHistoryResult = eventsCommand.ExecuteReader())
                 {
                     while (userHistoryResult.Read())
