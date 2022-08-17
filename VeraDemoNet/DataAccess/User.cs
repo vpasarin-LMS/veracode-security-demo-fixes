@@ -2,9 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web.Mvc;
 
 namespace VeraDemoNet.DataAccess
 {
+    [Bind(Include = "UserName, BlabName, RealName, Password")]
     public class User
     {
         public string UserName { get; set; }
