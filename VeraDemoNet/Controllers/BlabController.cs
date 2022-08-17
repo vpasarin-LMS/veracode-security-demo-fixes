@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Web.Mvc;
 using VeraDemoNet.Commands;
 using VeraDemoNet.DataAccess;
@@ -49,7 +48,7 @@ namespace VeraDemoNet.Controllers
         private string sqlSearchBlabs =
             "SELECT b.blabber, b.content, b.timestamp " +
             "FROM blabs b " +
-            "WHERE b.content LIKE '%{0}%' " + 
+            "WHERE b.content LIKE '%' + @searchValue + '%' " + 
             "ORDER BY b.timestamp DESC";
         
         private string sqlBlabDetails = 
@@ -107,6 +106,10 @@ namespace VeraDemoNet.Controllers
             {
                 dbContext.Database.Connection.Open();
                 var searchBlabs = dbContext.Database.Connection.CreateCommand();
+                var searchParameter = searchBlabs.CreateParameter();
+                searchParameter.ParameterName = "@searchValue";
+                searchParameter.Value = searchText;
+                searchBlabs.Parameters.Add(searchParameter);
                 searchBlabs.CommandText = string.Format(sqlSearchBlabs, searchText);
                 
                 var searchBlabsResults = searchBlabs.ExecuteReader();
