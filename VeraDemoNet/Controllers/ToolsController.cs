@@ -5,6 +5,7 @@ using System.Text;
 using System.Web.Hosting;
 using System.Web.Mvc;
 using VeraDemoNet.Models;
+using System.Text.RegularExpressions;
 
 namespace VeraDemoNet.Controllers
 {
@@ -46,6 +47,9 @@ namespace VeraDemoNet.Controllers
 
         private string Ping(string host)
         {
+            var regexPattern = "(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)";
+            host = Regex.Match(host, regexPattern).ToString();
+
             if (string.IsNullOrEmpty(host))
             {
                 return "";
@@ -88,6 +92,14 @@ namespace VeraDemoNet.Controllers
 
             try
             {
+                if(fortuneFile.Contains("offensive"))
+                {
+                    fortuneFile = "offensive.txt";
+                } else
+                {
+                    fortuneFile = "funny.txt";
+                }
+
                 // START BAD CODE
                 var fileName = "cmd.exe";
                 var arguments = "/c " + HostingEnvironment.MapPath("~/Resources/bin/fortune-go.exe") + " " + HostingEnvironment.MapPath("~/Resources/bin/" + fortuneFile);
