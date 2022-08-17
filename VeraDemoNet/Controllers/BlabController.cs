@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Web.Mvc;
 using VeraDemoNet.Commands;
 using VeraDemoNet.DataAccess;
@@ -79,7 +80,7 @@ namespace VeraDemoNet.Controllers
 
         public BlabController()
         {
-            logger = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);    
+            logger = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         }
 
         [ActionName("SearchBlabs"), HttpGet]
@@ -163,7 +164,7 @@ namespace VeraDemoNet.Controllers
                     var post = new Blab
                     {
                         Id = blabsForMeResults.GetInt32(5),
-                        Content = blabsForMeResults.GetString(2),
+                        Content = Server.HtmlEncode(blabsForMeResults.GetString(2)),
                         PostDate = blabsForMeResults.GetDateTime(3),
                         CommentCount = blabsForMeResults.GetInt32(4),
                         Author = author
@@ -215,7 +216,7 @@ namespace VeraDemoNet.Controllers
             }
 
             var username = GetLoggedInUsername();
-            
+
             using (var dbContext = new BlabberDB())
             {
                 dbContext.Database.Connection.Open();
