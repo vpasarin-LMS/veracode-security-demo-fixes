@@ -52,8 +52,6 @@ namespace VeraDemoNet.Controllers
 
 
             var userDetailsCookie = Request.Cookies[COOKIE_NAME];
-            userDetailsCookie.HttpOnly = true;
-            userDetailsCookie.Secure = true;
 
             if (userDetailsCookie == null || userDetailsCookie.Value.Length == 0)
             {
@@ -63,6 +61,9 @@ namespace VeraDemoNet.Controllers
                 ViewBag.ReturnUrl = ReturnUrl;
                 return View();
             }
+
+            userDetailsCookie.HttpOnly = true;
+            userDetailsCookie.Secure = true;
 
             SessionIDManager sm = new SessionIDManager();
             string newSessionId = sm.CreateSessionID(System.Web.HttpContext.Current);
@@ -281,6 +282,12 @@ namespace VeraDemoNet.Controllers
 		
                 var extension = Path.GetExtension(file.FileName).ToLower();
                 var newFilename = Path.Combine(imageDir, userName);
+
+                if (!newFilename.EndsWith(".png"))
+                {
+                    RedirectToAction("Access Denied", "Error");
+                }
+
                 newFilename += extension;
 
                 logger.Info("Saving new profile image: " + newFilename);
@@ -438,6 +445,13 @@ namespace VeraDemoNet.Controllers
             var imagePath = Path.Combine(HostingEnvironment.MapPath("~/Images/"), image); 
 
 		    logger.Info("Fetching profile image: " + imagePath);
+
+            var path = HttpUtility.UrlDecode(imagePath);
+
+            if  (path.IndexOfAny(Path.GetInvalidFileNameChars()) > -1)
+            {
+                return RedirectToAction("Access Denied", "Error");
+            }
 
 	        return File(imagePath, System.Net.Mime.MediaTypeNames.Application.Octet);
         }
