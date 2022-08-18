@@ -69,7 +69,7 @@ namespace VeraDemoNet.DataAccess
             StringBuilder builder = new StringBuilder();
             if (string.IsNullOrEmpty(input))
             {
-                return sb.ToString();
+                return builder.ToString();
             }
 
             using (SHA256 sha256Hash = SHA256.Create())

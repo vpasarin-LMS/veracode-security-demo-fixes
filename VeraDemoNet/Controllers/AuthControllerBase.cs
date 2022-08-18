@@ -18,25 +18,6 @@ namespace VeraDemoNet.Controllers
 
             using (var dbContext = new BlabberDB())
             {
-                var getUserSaltAndKey = dbContext.Database.SqlQuery<User>(
-                    "select username, password_salt as passwordSalt, password_key as passwordKey from users where" +
-                    "username = @username;",
-                    new SqlParameter("username", userName)).First();
-
-                if (getUserSaltAndKey == null)
-                {
-                    return null;
-                } else
-                {
-                    using (var deriveBytes = new Rfc2898DeriveBytes(passWord, getUserSaltAndKey.PasswordSalt))
-                    {
-                        byte[] newKey = deriveBytes.GetBytes(20);
-
-                        if (!newKey.SequenceEqual(getUserSaltAndKey.PasswordKey))
-                            return null;
-                    }
-                }
-
                 var found = dbContext.Database.SqlQuery<BasicUser>(
                     "select username, real_name as realname, blab_name as blabname, is_admin as isadmin from users where "
                     + "username = @username and password = @password;",
@@ -111,7 +92,7 @@ namespace VeraDemoNet.Controllers
             StringBuilder builder = new StringBuilder();
             if (string.IsNullOrEmpty(input))
             {
-                return sb.ToString();
+                return builder.ToString();
             }
 
             using (SHA256 sha256Hash = SHA256.Create())
