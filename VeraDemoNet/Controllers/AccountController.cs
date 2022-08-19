@@ -37,13 +37,13 @@ namespace VeraDemoNet.Controllers
 
         public AccountController()
         {
-            logger = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);    
+            logger = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);  
         }
 
         [HttpGet, ActionName("Login")]
         public ActionResult GetLogin(string ReturnUrl = "")
         {
-            logger.Info("Login page visited: " + ReturnUrl);
+            logger.Info("Login page visited: " + EncodeLog(ReturnUrl));
 
             if (IsUserLoggedIn())
             {
@@ -149,13 +149,13 @@ namespace VeraDemoNet.Controllers
                         return RedirectToAction("Feed", "Blab");
                     }
 
-                    if (Url.IsLocalUrl(ReturnUrl) || whitelistedUrls.Contains(ReturnUrl, StringComparer.OrdinalIgnoreCase))
-                    {
+                    //if (Url.IsLocalUrl(ReturnUrl) || whitelistedUrls.Contains(ReturnUrl, StringComparer.OrdinalIgnoreCase))
+                    //{
                         /* START BAD CODE */
                         return Redirect(ReturnUrl);
                         /* END BAD CODE */
-                    }
-                    return RedirectToAction("Login", "Account");
+                    //}
+                    //return RedirectToAction("Login", "Account");
                 }
             }
             catch (Exception ex)
@@ -290,7 +290,7 @@ namespace VeraDemoNet.Controllers
 
                 newFilename += extension;
 
-                logger.Info("Saving new profile image: " + newFilename);
+                logger.Info("Saving new profile image: " + EncodeLog(newFilename));
 
                 file.SaveAs(newFilename);
             }
@@ -313,7 +313,7 @@ namespace VeraDemoNet.Controllers
         [AllowAnonymous]
         public ActionResult GetPasswordHint(string userName)
         {
-            logger.Info("Entering password-hint with username: " + userName);
+            logger.Info("Entering password-hint with username: " + EncodeLog(userName));
 		
             if (string.IsNullOrEmpty(userName))
             {
@@ -615,6 +615,21 @@ namespace VeraDemoNet.Controllers
             //EmailUser(userName);
 
             return RedirectToAction("Login", "Account", new LoginView {UserName = user.UserName});
+        }
+
+        private static string EncodeLog(string log)
+        {
+            const int maxLogLength = 500;
+            if (String.IsNullOrEmpty(log))
+            {
+                return String.Empty;
+            }
+            if (log.Length > maxLogLength)
+            {
+                log = log.Substring(0, maxLogLength);
+            }
+            log = log.Replace("\r", "").Replace("\n", "");
+            return HttpUtility.HtmlEncode(log);
         }
     }
 }
